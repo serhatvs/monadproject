@@ -1,94 +1,106 @@
-/**
- * page.tsx — Main page for Monad Wallet Security Scorer.
- * Owner: Team Member B (Frontend/UX)
- */
-
 "use client";
 
 import { useState } from "react";
-import { analyzeWallet } from "@/lib/api";
-import { WalletScoreResponse } from "@/types/wallet";
+import { useRouter } from "next/navigation";
 import AddressInput from "@/components/AddressInput";
-import ScoreCard from "@/components/ScoreCard";
-import RiskBreakdown from "@/components/RiskBreakdown";
-import ExplanationPanel from "@/components/ExplanationPanel";
-import { Shield } from "lucide-react";
+import {
+  ArrowRight,
+  BadgeCheck,
+  Gauge,
+  LockKeyhole,
+  Shield,
+} from "lucide-react";
 
 export default function Home() {
-  const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<WalletScoreResponse | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+  const [routing, setRouting] = useState(false);
 
-  async function handleAnalyze(address: string) {
-    setLoading(true);
-    setError(null);
-    setResult(null);
-    try {
-      const data = await analyzeWallet(address);
-      setResult(data);
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Unknown error occurred.");
-    } finally {
-      setLoading(false);
-    }
+  function handleWalletEntry(address: string) {
+    setRouting(true);
+    router.push(`/risk-analysis?address=${encodeURIComponent(address)}`);
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0f0c29] via-[#302b63] to-[#24243e] text-white">
-      {/* Header */}
-      <header className="border-b border-white/10 px-6 py-4">
-        <div className="max-w-6xl mx-auto flex items-center gap-3">
-          <Shield className="h-7 w-7 text-purple-400" />
-          <span className="text-lg font-bold tracking-tight">
-            Monad Wallet Scorer
+    <div className="relative min-h-screen overflow-hidden bg-[#f4f7fb] text-[#132033]">
+      <div className="console-grid pointer-events-none fixed inset-0 opacity-80" />
+
+      <header className="relative border-b border-[#d8e3ed] bg-white/85 px-4 py-4 backdrop-blur sm:px-6 lg:px-8">
+        <div className="mx-auto flex max-w-7xl items-center gap-3">
+          <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#2563eb] text-white shadow-[0_10px_30px_rgba(37,99,235,0.24)]">
+            <Shield className="h-5 w-5" aria-hidden="true" />
           </span>
-          <span className="ml-auto text-xs text-white/30 font-mono">MVP v0.1</span>
+          <div>
+            <p className="text-base font-semibold text-[#132033]">
+              Monad Wallet Scorer
+            </p>
+            <p className="text-xs text-[#52677d]">Public wallet entry</p>
+          </div>
         </div>
       </header>
 
-      {/* Hero */}
-      <section className="px-6 pt-16 pb-10 text-center">
-        <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-4">
-          Wallet Security{" "}
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
-            Scoring
-          </span>
-        </h1>
-        <p className="text-white/60 text-lg max-w-xl mx-auto mb-10">
-          Analyze any Monad wallet address for risk signals, trust indicators,
-          and get an AI-assisted security score in seconds.
-        </p>
-        <AddressInput onSubmit={handleAnalyze} loading={loading} />
-      </section>
-
-      {/* Error */}
-      {error && (
-        <div className="max-w-2xl mx-auto px-6 mb-8">
-          <div className="rounded-xl bg-red-500/20 border border-red-500/30 p-4 text-red-300 text-sm">
-            {error}
-          </div>
-        </div>
-      )}
-
-      {/* Results */}
-      {result && (
-        <section className="max-w-5xl mx-auto px-6 pb-16 grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Score card — left column */}
-          <div className="md:col-span-1 flex flex-col gap-6">
-            <ScoreCard result={result} />
-            <ExplanationPanel result={result} />
+      <main className="relative mx-auto grid min-h-[calc(100vh-145px)] w-full max-w-6xl place-items-center px-4 py-10 sm:px-6 lg:px-8">
+        <section className="w-full max-w-3xl rounded-lg border border-[#d8e3ed] bg-white/90 p-5 shadow-[0_24px_70px_rgba(42,70,100,0.14)] backdrop-blur sm:p-8">
+          <div className="mb-8 flex flex-wrap items-center justify-between gap-3">
+            <span className="inline-flex items-center gap-2 rounded-md border border-[#c7dcff] bg-[#eef6ff] px-3 py-2 text-sm font-medium text-[#17488f]">
+              <LockKeyhole className="h-4 w-4" aria-hidden="true" />
+              Public wallet lookup
+            </span>
+            <span className="inline-flex items-center gap-2 rounded-md border border-[#d8e3ed] bg-white px-3 py-2 text-sm font-medium text-[#52677d] shadow-sm">
+              <span className="h-2 w-2 rounded-full bg-[#2563eb]" />
+              Ready
+            </span>
           </div>
 
-          {/* Risk breakdown — right columns */}
-          <div className="md:col-span-2">
-            <RiskBreakdown result={result} />
+          <div className="max-w-2xl">
+            <p className="text-sm font-semibold text-[#2563eb]">
+              Start with a public address
+            </p>
+            <h1 className="mt-3 text-4xl font-bold text-[#10243e] sm:text-5xl">
+              Enter a wallet to open its risk analysis.
+            </h1>
+            <p className="mt-4 text-base leading-7 text-[#52677d] sm:text-lg">
+              Paste any public Monad wallet address. The next screen will run
+              the risk scan and show the full security breakdown.
+            </p>
+          </div>
+
+          <div className="mt-8">
+            <AddressInput onSubmit={handleWalletEntry} loading={routing} />
+          </div>
+
+          <div className="mt-8 grid gap-3 sm:grid-cols-3">
+            {[
+              {
+                label: "Public only",
+                Icon: BadgeCheck,
+              },
+              {
+                label: "Risk score",
+                Icon: Gauge,
+              },
+              {
+                label: "Send to analysis",
+                Icon: ArrowRight,
+              },
+            ].map((item) => {
+              const Icon = item.Icon;
+
+              return (
+                <div
+                  key={item.label}
+                  className="flex items-center gap-3 rounded-lg border border-[#d8e3ed] bg-[#f7fafc] px-4 py-3 text-sm font-medium text-[#34526f]"
+                >
+                  <Icon className="h-4 w-4 text-[#2563eb]" aria-hidden="true" />
+                  {item.label}
+                </div>
+              );
+            })}
           </div>
         </section>
-      )}
+      </main>
 
-      {/* Footer */}
-      <footer className="border-t border-white/10 px-6 py-6 text-center text-xs text-white/20">
-        Monad Wallet Scorer · Hackathon MVP · Built on Monad
+      <footer className="relative border-t border-[#d8e3ed] bg-white/65 px-4 py-5 text-center text-xs text-[#6b7f93] sm:px-6 lg:px-8">
+        Monad Wallet Scorer | Hackathon MVP | Built on Monad
       </footer>
     </div>
   );

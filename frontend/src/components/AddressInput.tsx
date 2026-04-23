@@ -1,12 +1,7 @@
-/**
- * AddressInput.tsx — Wallet address input form.
- * Owner: Team Member B (Frontend/UX)
- */
-
 "use client";
 
-import { useState } from "react";
-import { Search, Loader2 } from "lucide-react";
+import { useId, useState } from "react";
+import { Loader2, Search, Wallet } from "lucide-react";
 
 interface Props {
   onSubmit: (address: string) => void;
@@ -16,18 +11,21 @@ interface Props {
 export default function AddressInput({ onSubmit, loading }: Props) {
   const [value, setValue] = useState("");
   const [error, setError] = useState("");
+  const inputId = useId();
 
   function validate(addr: string): boolean {
     if (!/^0x[0-9a-fA-F]{40}$/.test(addr)) {
-      setError("Enter a valid Ethereum/Monad address (0x followed by 40 hex characters).");
+      setError("Enter a valid 0x address with 40 hexadecimal characters.");
       return false;
     }
+
     setError("");
     return true;
   }
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+
     const trimmed = value.trim();
     if (validate(trimmed)) {
       onSubmit(trimmed);
@@ -35,38 +33,55 @@ export default function AddressInput({ onSubmit, loading }: Props) {
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="w-full max-w-2xl mx-auto flex flex-col gap-3"
-    >
-      <div className="flex gap-2">
-        <input
-          type="text"
-          value={value}
-          onChange={(e) => {
-            setValue(e.target.value);
-            if (error) setError("");
-          }}
-          placeholder="0x… enter a Monad wallet address"
-          className="flex-1 rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-purple-500 backdrop-blur"
-          disabled={loading}
-          spellCheck={false}
-          autoComplete="off"
-        />
+    <form onSubmit={handleSubmit} className="w-full">
+      <label
+        htmlFor={inputId}
+        className="mb-2 block text-sm font-semibold text-[#253a52]"
+      >
+        Wallet address
+      </label>
+      <div className="flex flex-col gap-3 sm:flex-row">
+        <div className="relative min-w-0 flex-1">
+          <Wallet
+            className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#6b7f93]"
+            aria-hidden="true"
+          />
+          <input
+            id={inputId}
+            type="text"
+            value={value}
+            onChange={(e) => {
+              setValue(e.target.value);
+              if (error) setError("");
+            }}
+            placeholder="0x0000000000000000000000000000000000000000"
+            className="h-12 w-full rounded-lg border border-[#c9d8e6] bg-white pl-12 pr-4 font-mono text-sm text-[#132033] outline-none transition placeholder:text-[#98a9ba] focus:border-[#2563eb] focus:ring-2 focus:ring-[#93c5fd]/40 disabled:cursor-not-allowed disabled:bg-[#eef5f8] disabled:opacity-70"
+            disabled={loading}
+            spellCheck={false}
+            autoComplete="off"
+            autoCapitalize="none"
+            aria-invalid={Boolean(error)}
+            aria-describedby={error ? `${inputId}-error` : undefined}
+          />
+        </div>
         <button
           type="submit"
           disabled={loading || !value.trim()}
-          className="flex items-center gap-2 rounded-xl bg-purple-600 px-5 py-3 font-semibold text-white transition hover:bg-purple-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="inline-flex h-12 min-w-36 items-center justify-center gap-2 rounded-lg bg-[#2563eb] px-5 text-sm font-semibold text-white shadow-[0_12px_28px_rgba(37,99,235,0.22)] transition hover:bg-[#1d4ed8] focus:outline-none focus:ring-2 focus:ring-[#93c5fd] focus:ring-offset-2 focus:ring-offset-white disabled:cursor-not-allowed disabled:bg-[#9ebce9] disabled:shadow-none"
         >
           {loading ? (
-            <Loader2 className="h-5 w-5 animate-spin" />
+            <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
           ) : (
-            <Search className="h-5 w-5" />
+            <Search className="h-5 w-5" aria-hidden="true" />
           )}
-          {loading ? "Analyzing…" : "Analyze"}
+          {loading ? "Analyzing" : "Analyze"}
         </button>
       </div>
-      {error && <p className="text-sm text-red-400 pl-1">{error}</p>}
+      {error && (
+        <p id={`${inputId}-error`} className="mt-2 text-sm text-rose-700">
+          {error}
+        </p>
+      )}
     </form>
   );
 }
